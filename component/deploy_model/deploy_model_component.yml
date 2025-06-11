@@ -1,0 +1,32 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: deploy_model
+display_name: Deploy Model
+description: Deploys the registered model to an existing online endpoint.
+version: 41 # Start with version 1, the pipeline script will update it
+type: command
+
+inputs:
+  endpoint_name:
+    type: string
+  environment_name:
+    type: string
+  environment_version:
+    type: string
+  # FIX: Change type to uri_file to match the output of the register_model step
+  model_name:
+    type: uri_file
+  # FIX: Change type to uri_file to match the output of the register_model step
+  model_version:
+    type: uri_file
+
+outputs:
+  deployment_status:
+    type: uri_file
+
+# The python script, score.py, and this yaml should be in the same directory
+code: .
+
+command: >-
+  python deploy_model_component.py --endpoint_name ${{inputs.endpoint_name}} --environment_name ${{inputs.environment_name}} --environment_version ${{inputs.environment_version}} --model_name ${{inputs.model_name}} --model_version ${{inputs.model_version}} --deployment_status ${{outputs.deployment_status}}
+
+environment: azureml:h2o-env:3
