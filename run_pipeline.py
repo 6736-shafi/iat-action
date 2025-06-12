@@ -1,7 +1,11 @@
 
 
+
+
+
 # run_pipeline.py sdfdff
 # sdfsfd
+
 import os
 from datetime import datetime
 from azure.ai.ml import MLClient, load_component, Input
@@ -145,7 +149,7 @@ if __name__ == "__main__":
     pipeline_job = model_cicd_pipeline(
         model_path=Input(type='uri_file', path='./model/GBM_model_python_1749296476765_1.zip'), 
         model_name="my-h2o-cicd-model",
-        endpoint_name="iat-endpiont-v3", # Make sure this endpoint exists or will be created
+        endpoint_name="shafi", # Make sure this endpoint exists or will be created
         environment_base_name="iat-h2o-env",
         conda_file=Input(type='uri_file', path='./conda.yaml')
     )
