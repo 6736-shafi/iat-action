@@ -1,59 +1,61 @@
-name: Deploy Azure ML Pipeline (Dev to Prod)
+name: Deploy Azure ML Pipeline
 
+# Trigger the workflow on a push to the main branch
 on:
-  push:
+  push: # This workflow will run when a PR is opened targeting 'main'
     branches:
       - dev
-      - main
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to run this workflow manually
 
 jobs:
-  deploy-to-dev:
-    if: github.ref == 'refs/heads/dev'
+  build-and-deploy:
     runs-on: ubuntu-latest
-    environment: development
+
+    environment: production # Optional: link to a GitHub environment for protection rules
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Debug - List files
-        run: |
-          echo "Listing files in current directory: $(pwd)"
-          ls -F
-          echo "Listing files recursively in current directory:"
-          ls -RF .
-          echo "Checking for 'components' directory:"
-          if [ -d "components" ]; then
-            echo "'components' directory found."
-            ls -RF components/
-          else
-            echo "'components' directory NOT found!"
-          fi
+    # --- ADD THIS DEBUGGING STEP ---
+    - name: List files for debugging
+      run: |
+        echo "Listing files in current directory: $(pwd)"
+        ls -F
+        echo ""
+        echo "Listing files recursively in current directory:"
+        ls -RF .
+        echo ""
+        echo "Checking for 'components' directory:"
+        if [ -d "components" ]; then
+          echo " 'components' directory found."
+          echo "Listing contents of 'components' directory:"
+          ls -RF components/
+        else
+          echo " 'components' directory NOT found!"
+        fi
+    # --------------------------------
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install azure-ai-ml azure-identity
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install azure-ai-ml azure-identity
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Run Pipeline in Dev
-        env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          AZURE_WORKSPACE: ${{ secrets.AZURE_WORKSPACE }}
-        run: python run_pipeline.py
-
-  
+    - name: Run Azure ML Pipeline
+      env:
+        # Pass the secrets to the python script as environment variables
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        AZURE_WORKSPACE: ${{ secrets.AZURE_WORKSPACE }}
+      run: |
+        python run_pipeline.py
