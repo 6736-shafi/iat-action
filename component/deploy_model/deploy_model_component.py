@@ -203,28 +203,55 @@ from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 
 def get_ml_client():
-    """Authenticates and returns an MLClient using credentials from the environment."""
+    """
+    Authenticates and returns an MLClient.
+    Prioritizes ClientSecretCredential (for service principal) with hardcoded values,
+    otherwise falls back to DefaultAzureCredential.
+    """
+    # --- WARNING: HARDCODING CREDENTIALS IS NOT RECOMMENDED FOR PRODUCTION ---
+    # This is for temporary testing only. For secure applications, use environment variables
+    # or Azure Key Vault to manage secrets.
+
+    tenant_id = "084a029e-1435-40bc-8201-87ec1b251fb3"
+    client_id = "bd13c2e3-28bc-4e29-bc12-1d2461071a68"
+    client_secret = "5lO8Q~1IFYUOtQff0rGSBKgwJD3L-6GX3AFOKank"
+
+
+    # Your Azure subscription, resource group, and workspace details
+    subscription_id = "6bd1f99e-e7cb-4226-b9d5-09433d793bda"
+    resource_group_name = "shafi1"
+    workspace_name = "shafi1"
+
+    # Use ClientSecretCredential with the hardcoded values
+    print("Attempting authentication with hardcoded Service Principal credentials...")
+    credential = ClientSecretCredential(
+        tenant_id=tenant_id,
+        client_id=client_id,
+        client_secret=client_secret
+    )
+    # The DefaultAzureCredential fallback path is now less likely to be hit,
+    # but the structure remains if you decide to uncomment it later.
     try:
-        credential = DefaultAzureCredential()
-        # Check if the credential can get a token.
+        # Attempt to get a token to verify the hardcoded credentials
         credential.get_token("https://management.azure.com/.default")
-        print("Authentication successful.")
+        print("Hardcoded Service Principal authentication successful.")
     except Exception as e:
-        print(f"Authentication failed: {e}")
-        # In a CI/CD environment, we want to fail fast if auth isn't configured.
-        raise
+        print(f"Hardcoded Service Principal authentication failed: {e}.")
+        print("Falling back to DefaultAzureCredential (which may prompt for interactive login if no other credentials are found)...")
+        try:
+            credential = DefaultAzureCredential()
+            credential.get_token("https://management.azure.com/.default")
+            print("DefaultAzureCredential successful.")
+        except Exception as inner_e:
+            print(f"DefaultAzureCredential also failed: {inner_e}. Falling back to InteractiveBrowserCredential...")
+            credential = InteractiveBrowserCredential()
 
-    # Get workspace details from environment variables
-    subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
-    resource_group = os.environ["AZURE_RESOURCE_GROUP"]
-    workspace_name = os.environ["AZURE_WORKSPACE"]
 
-    print(f"Connecting to workspace: {workspace_name} in resource group: {resource_group}")
-
+    # Initialize MLClient
     return MLClient(
         credential=credential,
         subscription_id=subscription_id,
-        resource_group_name=resource_group,
+        resource_group_name=resource_group_name,
         workspace_name=workspace_name
     )
 
