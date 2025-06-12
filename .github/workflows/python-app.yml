@@ -2,9 +2,9 @@ name: Deploy Azure ML Pipeline
 
 # Trigger the workflow on a push to the main branch
 on:
-  push: # This workflow will run when a PR is opened targeting 'main'
+  pull_request: # This workflow will run when a PR is opened targeting 'main'
     branches:
-      - dev
+      - main
   workflow_dispatch: # Allows you to run this workflow manually
 
 jobs:
