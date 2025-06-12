@@ -13,7 +13,7 @@ import argparse
 import sys
 from pathlib import Path
 import os
-from dotenv import load_dotenv # Although not directly used with hardcoded values, good practice to keep for future flexibility
+
 
 from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential, ClientSecretCredential
 from azure.ai.ml import MLClient
