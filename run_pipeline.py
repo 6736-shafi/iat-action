@@ -3,9 +3,9 @@ import os
 from datetime import datetime
 from azure.ai.ml import MLClient, load_component, Input
 from azure.ai.ml.dsl import pipeline
-from dotenv import load_dotenv
+
 from azure.identity import DefaultAzureCredential
-load_dotenv()
+
 import os
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
