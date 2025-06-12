@@ -54,7 +54,7 @@ jobs:
         run: python run_pipeline.py
 
   deploy-to-prod:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     needs: deploy-to-dev
     runs-on: ubuntu-latest
     environment: production  # Require manual approval in GitHub settings
