@@ -20,6 +20,7 @@ from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential,
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import Environment
 from azure.core.exceptions import ResourceNotFoundError # Import for catching specific exception (though less critical for create_or_update)
+# fjsldf
 
 def get_ml_client():
     """
@@ -152,7 +153,12 @@ if __name__ == "__main__":
     )
     
     print("="*60)
+    # nnn
     print(f"Pipeline job submitted. Name: {submitted_job.name}")
     print(f"View in Azure ML Studio: {submitted_job.studio_url}")
-    print("="*60)
+    print("="*60) 
+    # fsldjflsdjflsdkfjdsklfljsdlfjsdlfjlsdjflsdjflsdjflsdj
+    # fjlksdflsjfsjfsjd
+    # dsfflsjdlfkjdkljskldfjklsd
     # sdfsd
+
