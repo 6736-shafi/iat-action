@@ -1,4 +1,7 @@
-# run_pipeline.pydsfs
+
+
+# run_pipeline.py sdfdff
+
 import os
 from datetime import datetime
 from azure.ai.ml import MLClient, load_component, Input
