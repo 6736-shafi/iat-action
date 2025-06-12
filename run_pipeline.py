@@ -147,7 +147,7 @@ if __name__ == "__main__":
     register_components(ml_client, version)
     
     pipeline_job = model_cicd_pipeline(
-        model_path=Input(type='uri_file', path='./model/GBM_model_python_1749296476765_1.zip'), 
+        model_path=Input(type='uri_file', path='./model/GBM_model_python_1749740346516_1.zip'), 
         model_name="my-h2o-cicd-model",
         endpoint_name="shafi1", # Make sure this endpoint exists or will be created
         environment_base_name="iat-h2o-env",
