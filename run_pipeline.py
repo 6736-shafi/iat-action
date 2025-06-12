@@ -76,9 +76,9 @@ def get_ml_client():
 def register_components(ml_client: MLClient, version: str):
     """Loads components from YAML and registers them with a unique version."""
     component_yamls = [
-        "./components/create_environment/create_environment_component.yml",
-        "./components/register_model/register_model_component.yml",
-        "./components/deploy_model/deploy_model_component.yml",
+        "./component/create_environment/create_environment_component.yml",
+        "./component/register_model/register_model_component.yml",
+        "./component/deploy_model/deploy_model_component.yml",
     ]
     
     for comp_yaml in component_yamls:
