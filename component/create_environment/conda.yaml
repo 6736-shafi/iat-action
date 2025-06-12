@@ -1,4 +1,4 @@
-name: h2o-mojo-env-v1
+name: h2o-mojo-env-v2
 channels:
   - conda-forge
 dependencies:

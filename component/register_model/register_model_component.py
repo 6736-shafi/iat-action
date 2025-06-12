@@ -9,22 +9,35 @@ from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 from azure.identity import InteractiveBrowserCredential
 
+# new get_ml_client() for all component scripts
+import os
+from azure.ai.ml import MLClient
+from azure.identity import DefaultAzureCredential
+
 def get_ml_client():
-    """Authenticates and returns an MLClient."""
+    """Authenticates and returns an MLClient using credentials from the environment."""
     try:
         credential = DefaultAzureCredential()
         # Check if the credential can get a token.
         credential.get_token("https://management.azure.com/.default")
-    except Exception:
-        # Fall back to interactive credential if default fails.
-        credential = InteractiveBrowserCredential()
-    
-    # Replace with your subscription, resource group, and workspace details
+        print("Authentication successful.")
+    except Exception as e:
+        print(f"Authentication failed: {e}")
+        # In a CI/CD environment, we want to fail fast if auth isn't configured.
+        raise
+
+    # Get workspace details from environment variables
+    subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
+    resource_group = os.environ["AZURE_RESOURCE_GROUP"]
+    workspace_name = os.environ["AZURE_WORKSPACE"]
+
+    print(f"Connecting to workspace: {workspace_name} in resource group: {resource_group}")
+
     return MLClient(
         credential=credential,
-        subscription_id="6bd1f99e-e7cb-4226-b9d5-09433d793bda",
-        resource_group_name="shafi1",
-        workspace_name="shafi1"
+        subscription_id=subscription_id,
+        resource_group_name=resource_group,
+        workspace_name=workspace_name
     )
 
 

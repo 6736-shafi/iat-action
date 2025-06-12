@@ -1,0 +1,34 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: create_environment
+display_name: Create or Update Environment
+description: Creates or updates a reusable Azure ML Environment from a conda file.
+version: 2
+type: command
+
+inputs:
+  environment_name:
+    type: string
+    description: The base name for the environment.
+  conda_file:
+    type: uri_file
+    description: Path to the conda.yaml file.
+
+outputs:
+  created_env_name:
+    type: uri_file
+  created_env_version:
+    type: uri_file
+
+code: .
+
+command: >-
+  python create_environment_component.py
+  --environment_name ${{inputs.environment_name}}
+  --conda_file ${{inputs.conda_file}}
+  --created_env_name ${{outputs.created_env_name}}
+  --created_env_version ${{outputs.created_env_version}}
+
+# This component needs an environment with azure-ai-ml to run
+environment:
+  conda_file: ./conda.yaml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
