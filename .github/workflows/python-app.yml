@@ -1,9 +1,12 @@
-name: Deploy Azure ML Pipeline
+name: Deploy Azure ML Pipeline (Dev to Prod)
 
 on:
   push:
     branches:
       - dev
+      - main
+  pull_request:
+    branches:
       - main
   workflow_dispatch:
 
@@ -11,11 +14,25 @@ jobs:
   deploy-to-dev:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: development
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Debug - List files
+        run: |
+          echo "Listing files in current directory: $(pwd)"
+          ls -F
+          echo "Listing files recursively in current directory:"
+          ls -RF .
+          echo "Checking for 'components' directory:"
+          if [ -d "components" ]; then
+            echo "'components' directory found."
+            ls -RF components/
+          else
+            echo "'components' directory NOT found!"
+          fi
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
@@ -40,14 +57,28 @@ jobs:
         run: python run_pipeline.py
 
   deploy-to-prod:
-    needs: deploy-to-dev
     if: github.ref == 'refs/heads/main'
+    needs: deploy-to-dev
     runs-on: ubuntu-latest
-    environment: prod  # This environment will require manual approval
+    environment: production  # Require manual approval in GitHub settings
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Debug - List files
+        run: |
+          echo "Listing files in current directory: $(pwd)"
+          ls -F
+          echo "Listing files recursively in current directory:"
+          ls -RF .
+          echo "Checking for 'components' directory:"
+          if [ -d "components" ]; then
+            echo "'components' directory found."
+            ls -RF components/
+          else
+            echo "'components' directory NOT found!"
+          fi
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
