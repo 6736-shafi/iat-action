@@ -151,7 +151,9 @@ if __name__ == "__main__":
     )
     
     print("="*60)
+    # nnn
     print(f"Pipeline job submitted. Name: {submitted_job.name}")
     print(f"View in Azure ML Studio: {submitted_job.studio_url}")
-    print("="*60)
+    print("="*60) gdsf
     # sdfsd
+
