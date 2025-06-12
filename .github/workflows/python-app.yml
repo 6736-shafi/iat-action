@@ -17,6 +17,25 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # --- ADD THIS DEBUGGING STEP ---
+    - name: List files for debugging
+      run: |
+        echo "Listing files in current directory: $(pwd)"
+        ls -F
+        echo ""
+        echo "Listing files recursively in current directory:"
+        ls -RF .
+        echo ""
+        echo "Checking for 'components' directory:"
+        if [ -d "components" ]; then
+          echo " 'components' directory found."
+          echo "Listing contents of 'components' directory:"
+          ls -RF components/
+        else
+          echo " 'components' directory NOT found!"
+        fi
+    # --------------------------------
+
     - name: Set up Python 3.9
       uses: actions/setup-python@v5
       with:
