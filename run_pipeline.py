@@ -32,6 +32,26 @@ from azure.core.exceptions import ResourceNotFoundError # Import for catching sp
 # fjsldf
 
 from src.config.connect import get_ml_client
+import os
+from src.config.connect import get_ml_client
+from azure.ai.ml.entities import Model
+from azure.ai.ml.constants import AssetTypes
+
+# --- Retrieve environment variables *inside* run_pipeline.py ---
+# These variables are set by the 'env' block in your GitHub Actions workflow.
+subscription_id = os.environ.get("SUBSCRIPTION_ID")
+resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
+workspace_name = os.environ.get("WORKSPACE_NAME")
+
+# --- Add checks to ensure variables are present ---
+if not all([subscription_id, resource_group_name, workspace_name]):
+    missing_vars = [v for v, val in {"SUBSCRIPTION_ID": subscription_id, "RESOURCE_GROUP_NAME": resource_group_name, "WORKSPACE_NAME": workspace_name}.items() if val is None]
+    raise ValueError(f"Missing one or more required Azure ML environment variables: {', '.join(missing_vars)}. Please ensure they are set in your GitHub workflow secrets and correctly passed to the 'Run Pipeline' step.")
+
+# --- Initialize MLClient by passing the retrieved values ---
+# This is the crucial change to resolve the TypeError
+ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
+print("🎯 MLClient created successfully.")
 
 def register_components(ml_client: MLClient, version: str):
     """Loads components from YAML and registers them with a unique version."""
@@ -88,7 +108,7 @@ def model_cicd_pipeline(
     return {"deployment_status": deploy_step.outputs.deployment_status}
 
 if __name__ == "__main__":
-    ml_client = get_ml_client()
+    ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
     
     # Unique version for this run, e.g., based on timestamp or git commit hash
     version = datetime.now().strftime("%Y.%m.%d.%H%M%S")
