@@ -4,27 +4,29 @@ on:
   push:
     branches:
       - dev
-      - main # Added main branch for direct pushes to maina
+      - main # Trigger on pushes to dev and main branches
   pull_request:
     branches:
       - main
-    types: [closed] # Triggers on PR merge into main
-  workflow_dispatch: # Allows manual trigger
+    types: [closed] # Trigger on PR merge into main for production deployment
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
   deploy-to-dev:
+    # Only run this job when pushing to the 'dev' branch
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    environment: development # Ensure this GitHub environment exists and is configured with required secrets
+    environment: development # Associate with the 'development' GitHub environment for secrets and rules
     permissions:
-      id-token: write # Required for OIDC authentication
-      contents: read # Required to checkout code
+      id-token: write # Required for OpenID Connect (OIDC) authentication with Azure
+      contents: read # Required to checkout the repository code
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Debug - List files
+      - name: Debug - List files in current directory
+        # This step helps verify that all necessary files (e.g., run_pipeline.py, components directory) are present
         run: |
           echo "Listing files in current directory: $(pwd)"
           ls -F
@@ -43,41 +45,53 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
+        # Install required Python packages for Azure ML interaction
         run: |
           python -m pip install --upgrade pip
           pip install azure-ai-ml azure-identity
 
       - name: Log in to Azure with OIDC
-        uses: azure/login@v1.4.6 # Use a specific version for stability, check marketplace for latest
+        # Uses the Azure Login action for secure, credential-less authentication via OIDC
+        # Ensure AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID secrets are configured in the 'development' environment
+        uses: azure/login@v1.4.6 # Pinning to a specific version for stability
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          # No 'creds' needed with OIDC when client-id, tenant-id, subscription-id are provided directly.
-          # The azure/login action will use these for OIDC.
+          # No 'creds' input is needed when using client-id, tenant-id, and subscription-id for OIDC
 
-      - name: Run Pipeline in Dev
+      - name: Verify Azure CLI Login
+        # Optional: Run a simple Azure CLI command to confirm successful login
+        run: az account show
+
+      - name: Run Azure ML Pipeline in Dev Environment
+        # Pass Azure ML workspace details as environment variables to the Python script
         env:
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
-        run: python run_pipeline.py
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }} # Ensure this secret is set for 'development'
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }} # Ensure this secret is set for 'development'
+        run: python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
 
   deploy-to-prod:
-    # Trigger on push to main or on closed PR targeting main
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main')
+    # Trigger conditions for production deployment:
+    # 1. Push directly to the 'main' branch
+    # 2. A pull request is merged into the 'main' branch
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    environment: production # Require manual approval in GitHub settings
+    environment: production # Associate with the 'production' GitHub environment (can require manual approval)
     permissions:
       id-token: write # Required for OIDC authentication
-      contents: read # Required to checkout code
+      contents: read # Required to checkout the repository code
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Debug - List files
+      - name: Debug - List files in current directory
+        # This step helps verify that all necessary files are present
         run: |
           echo "Listing files in current directory: $(pwd)"
           ls -F
@@ -96,21 +110,30 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
+        # Install required Python packages for Azure ML interaction
         run: |
           python -m pip install --upgrade pip
           pip install azure-ai-ml azure-identity
 
       - name: Log in to Azure with OIDC
-        uses: azure/login@v1.4.6 # Use a specific version for stability
+        # Uses the Azure Login action for secure, credential-less authentication via OIDC
+        # Ensure AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID secrets are configured in the 'production' environment
+        uses: azure/login@v1.4.6 # Pinning to a specific version for stability
+
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Run Pipeline in Prod
+      - name: Verify Azure CLI Login
+        # Optional: Run a simple Azure CLI command to confirm successful login
+        run: az account show
+
+      - name: Run Azure ML Pipeline in Prod Environment
+        # Pass Azure ML workspace details as environment variables to the Python script
         env:
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
-        run: python run_pipeline.py
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }} # Ensure this secret is set for 'production'
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }} # Ensure this secret is set for 'production'
+        run: python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
