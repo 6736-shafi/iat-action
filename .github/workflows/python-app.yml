@@ -17,9 +17,8 @@ jobs:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment: development # Associate with the 'development' GitHub environment for secrets and rules
-
-    # Permissions for OIDC are removed as the authentication method has changed to service principal secret.
-    # If OIDC is desired again, ensure 'id-token: write' is re-added here.
+    permissions:
+      contents: read # Required to checkout the repository code
 
     steps:
       - name: Checkout repository
@@ -57,6 +56,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Debug - Print Azure Environment Variables
+        # This step helps confirm the values of environment variables passed to the Python script.
+        run: |
+          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
+          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
+          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
+        env:
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
+
       - name: Run Pipeline in Dev
         # Pass Azure ML workspace details as environment variables to the Python script
         env:
@@ -72,9 +82,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production # Associate with the 'production' GitHub environment (can require manual approval)
-
-    # Permissions for OIDC are removed as the authentication method has changed to service principal secret.
-    # If OIDC is desired again, ensure 'id-token: write' is re-added here.
+    permissions:
+      contents: read # Required to checkout the repository code
 
     steps:
       - name: Checkout repository
@@ -111,6 +120,17 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Debug - Print Azure Environment Variables
+        # This step helps confirm the values of environment variables passed to the Python script.
+        run: |
+          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
+          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
+          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
+        env:
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
 
       - name: Run Pipeline in Prod
         # Pass Azure ML workspace details as environment variables to the Python script
