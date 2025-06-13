@@ -3,7 +3,7 @@ name: Deploy Azure ML Pipeline (Dev to Prod)
 on:
   push:
     branches:
-      - dev # Trigger on pushes to the 'dev' branchs
+      - dev # Trigger on pushes to the 'dev' branch
   pull_request:
     branches:
       - main
