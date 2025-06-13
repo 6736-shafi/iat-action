@@ -202,8 +202,32 @@ import os
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 from config.connect import get_ml_client
-client = get_ml_client()
-print(client)
+# --- Retrieve environment variables *inside* run_pipeline.py ---
+# These variables are set by the 'env' block in your GitHub Actions workflow.
+subscription_id = os.environ.get("SUBSCRIPTION_ID")
+resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
+workspace_name = os.environ.get("WORKSPACE_NAME")
+
+# --- Add robust checks to ensure variables are present and not empty ---
+missing_vars = []
+if not subscription_id: # Checks for None or empty string
+    missing_vars.append("SUBSCRIPTION_ID")
+if not resource_group_name: # Checks for None or empty string
+    missing_vars.append("RESOURCE_GROUP_NAME")
+if not workspace_name: # Checks for None or empty string
+    missing_vars.append("WORKSPACE_NAME")
+
+if missing_vars:
+    raise ValueError(
+        f"Missing or empty required Azure ML environment variables: "
+        f"{', '.join(missing_vars)}. "
+        f"Please ensure they are set in your GitHub workflow secrets "
+        f"and correctly passed to the 'Run Pipeline' step."
+    )
+
+# --- Initialize MLClient by passing the retrieved values ---
+ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
+print("🎯 MLClient created successfully.")
 
 def main(endpoint_name, env_name_path, env_version_path, model_name_path, model_version_path, out_status_path=None):
     """
