@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.jso
 name: deploy_model
 display_name: Deploy Model
 description: Deploys the registered model to an existing online endpoint.
-version: 42 # Increment version after change
+version: 4201 # Increment version after change
 type: command
 
 inputs:
@@ -23,7 +23,7 @@ outputs:
   deployment_status:
     type: uri_file
 
-code: .
+code: ../../src
 
 command: >-
   python deploy_model_component.py 

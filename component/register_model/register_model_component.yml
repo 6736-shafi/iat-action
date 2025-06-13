@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.jso
 name: register_model
 display_name: Register Model
 description: Registers a model in the Azure ML Workspace.
-version: 41 # Start with version 1, the pipeline script will update it
+version: 4101 # Start with version 1, the pipeline script will update it
 type: command
 
 inputs:
@@ -20,7 +20,7 @@ outputs:
     type: uri_file
 
 # The python script and this yaml should be in the same directory
-code: . 
+code: ../../src
 
 command: >-
   python register_model_component.py --model_path ${{inputs.model_path}} --model_name ${{inputs.model_name}} --registered_model_name ${{outputs.registered_model_name}} --registered_model_version ${{outputs.registered_model_version}}

@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.jso
 name: create_environment
 display_name: Create or Update Environment
 description: Creates or updates a reusable Azure ML Environment from a conda file.
-version: 2
+version: 2001
 type: command
 
 inputs:
@@ -19,7 +19,7 @@ outputs:
   created_env_version:
     type: uri_file
 
-code: .
+code: ../../src
 
 command: >-
   python create_environment_component.py
