@@ -31,7 +31,6 @@ from azure.ai.ml.entities import Environment
 from azure.core.exceptions import ResourceNotFoundError # Import for catching specific exception (though less critical for create_or_update)
 # fjsldf
 
-from src.config.connect import get_ml_client
 import os
 from src.config.connect import get_ml_client
 from azure.ai.ml.entities import Model
@@ -43,15 +42,36 @@ subscription_id = os.environ.get("SUBSCRIPTION_ID")
 resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
 workspace_name = os.environ.get("WORKSPACE_NAME")
 
-# --- Add checks to ensure variables are present ---
-if not all([subscription_id, resource_group_name, workspace_name]):
-    missing_vars = [v for v, val in {"SUBSCRIPTION_ID": subscription_id, "RESOURCE_GROUP_NAME": resource_group_name, "WORKSPACE_NAME": workspace_name}.items() if val is None]
-    raise ValueError(f"Missing one or more required Azure ML environment variables: {', '.join(missing_vars)}. Please ensure they are set in your GitHub workflow secrets and correctly passed to the 'Run Pipeline' step.")
+# --- Add robust checks to ensure variables are present and not empty ---
+missing_vars = []
+if not subscription_id: # Checks for None or empty string
+    missing_vars.append("SUBSCRIPTION_ID")
+if not resource_group_name: # Checks for None or empty string
+    missing_vars.append("RESOURCE_GROUP_NAME")
+if not workspace_name: # Checks for None or empty string
+    missing_vars.append("WORKSPACE_NAME")
+
+if missing_vars:
+    raise ValueError(
+        f"Missing or empty required Azure ML environment variables: "
+        f"{', '.join(missing_vars)}. "
+        f"Please ensure they are set in your GitHub workflow secrets "
+        f"and correctly passed to the 'Run Pipeline' step."
+    )
 
 # --- Initialize MLClient by passing the retrieved values ---
-# This is the crucial change to resolve the TypeError
 ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
 print("🎯 MLClient created successfully.")
+
+# --- Your existing model registration code ---
+model = Model(
+    path="./GBM_model_python_1749296476765_1.zip",
+    type=AssetTypes.CUSTOM_MODEL,
+    name="h2o-model",
+    description="My custom model registered from local file"
+)
+registered_model = ml_client.models.create_or_update(model)
+print(f"Model registered: {registered_model.name}, Version: {registered_model.version}")
 
 def register_components(ml_client: MLClient, version: str):
     """Loads components from YAML and registers them with a unique version."""
