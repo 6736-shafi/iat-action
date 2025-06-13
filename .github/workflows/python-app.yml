@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      - main # Added main branch for direct pushes to main
+      - main # Added main branch for direct pushes to maina
   pull_request:
     branches:
       - main
