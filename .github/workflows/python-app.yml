@@ -50,9 +50,9 @@ jobs:
 
       - name: Run Pipeline in Dev
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          AZURE_WORKSPACE: ${{ secrets.AZURE_WORKSPACE }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
         run: python run_pipeline.py
 
   deploy-to-prod:
@@ -94,7 +94,7 @@ jobs:
 
       - name: Run Pipeline in Prod
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          AZURE_WORKSPACE: ${{ secrets.AZURE_WORKSPACE }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
         run: python run_pipeline.py
