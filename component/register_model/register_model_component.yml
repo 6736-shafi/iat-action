@@ -26,3 +26,12 @@ command: >-
   python register_model_component.py --model_path ${{inputs.model_path}} --model_name ${{inputs.model_name}} --registered_model_name ${{outputs.registered_model_name}} --registered_model_version ${{outputs.registered_model_version}}
 
 environment: azureml:h2o-env:3
+
+
+environment_variables:
+  TENANT_ID: ${{env.TENANT_ID}}
+  CLIENT_ID: ${{env.CLIENT_ID}}
+  CLIENT_SECRET: ${{env.CLIENT_SECRET}}
+  SUBSCRIPTION_ID: ${{env.SUBSCRIPTION_ID}}
+  RESOURCE_GROUP_NAME: ${{env.RESOURCE_GROUP_NAME}}
+  WORKSPACE_NAME: ${{env.WORKSPACE_NAME}}
