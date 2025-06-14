@@ -30,88 +30,13 @@ import os
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 
-# def get_ml_client():
-#     """
-#     Authenticates and returns an MLClient.
-#     Prioritizes ClientSecretCredential (for service principal) with hardcoded values,
-#     otherwise falls back to DefaultAzureCredential.
-#     """
-#     # --- WARNING: HARDCODING CREDENTIALS IS NOT RECOMMENDED FOR PRODUCTION ---
-#     # This is for temporary testing only. For secure applications, use environment variables
-#     # or Azure Key Vault to manage secrets.
 
-#     tenant_id = "084a029e-1435-40bc-8201-87ec1b251fb3"
-#     client_id = "bd13c2e3-28bc-4e29-bc12-1d2461071a68"
-#     client_secret = "5lO8Q~1IFYUOtQff0rGSBKgwJD3L-6GX3AFOKank"
-
-
-#     # Your Azure subscription, resource group, and workspace details
-#     subscription_id = "6bd1f99e-e7cb-4226-b9d5-09433d793bda"
-#     resource_group_name = "shafi1"
-#     workspace_name = "shafi1"
-
-#     # Use ClientSecretCredential with the hardcoded values
-#     print("Attempting authentication with hardcoded Service Principal credentials...")
-#     credential = ClientSecretCredential(
-#         tenant_id=tenant_id,
-#         client_id=client_id,
-#         client_secret=client_secret
-#     )
-#     # The DefaultAzureCredential fallback path is now less likely to be hit,
-#     # but the structure remains if you decide to uncomment it later.
-#     try:
-#         # Attempt to get a token to verify the hardcoded credentials
-#         credential.get_token("https://management.azure.com/.default")
-#         print("Hardcoded Service Principal authentication successful.")
-#     except Exception as e:
-#         print(f"Hardcoded Service Principal authentication failed: {e}.")
-#         print("Falling back to DefaultAzureCredential (which may prompt for interactive login if no other credentials are found)...")
-#         try:
-#             credential = DefaultAzureCredential()
-#             credential.get_token("https://management.azure.com/.default")
-#             print("DefaultAzureCredential successful.")
-#         except Exception as inner_e:
-#             print(f"DefaultAzureCredential also failed: {inner_e}. Falling back to InteractiveBrowserCredential...")
-#             credential = InteractiveBrowserCredential()
-
-
-#     # Initialize MLClient
-#     return MLClient(
-#         credential=credential,
-#         subscription_id=subscription_id,
-#         resource_group_name=resource_group_name,
-#         workspace_name=workspace_name
-#     )
 
 
 import inspect, os
 from config.connect import get_ml_client
-# --- Retrieve environment variables *inside* run_pipeline.py ---
-# These variables are set by the 'env' block in your GitHub Actions workflow.
-subscription_id = os.environ.get("SUBSCRIPTION_ID")
-resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
-workspace_name = os.environ.get("WORKSPACE_NAME")
-
-# --- Add robust checks to ensure variables are present and not empty ---
-missing_vars = []
-if not subscription_id: # Checks for None or empty string
-    missing_vars.append("SUBSCRIPTION_ID")
-if not resource_group_name: # Checks for None or empty string
-    missing_vars.append("RESOURCE_GROUP_NAME")
-if not workspace_name: # Checks for None or empty string
-    missing_vars.append("WORKSPACE_NAME")
-
-if missing_vars:
-    raise ValueError(
-        f"Missing or empty required Azure ML environment variables: "
-        f"{', '.join(missing_vars)}. "
-        f"Please ensure they are set in your GitHub workflow secrets "
-        f"and correctly passed to the 'Run Pipeline' step."
-    )
-
-# --- Initialize MLClient by passing the retrieved values ---
-ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
-print("🎯 MLClient created successfully.")
+ml_client = get_ml_client()
+print(ml_client)
 
 def main(model_path, model_name, out_name_path, out_version_path):
     """

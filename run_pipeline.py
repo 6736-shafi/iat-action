@@ -1,77 +1,16 @@
 
-
-
-
-
-# run_pipeline.py sdfdff
-# sdfsfd
-
-import os
 from datetime import datetime
 from azure.ai.ml import MLClient, load_component, Input
 from azure.ai.ml.dsl import pipeline
 
-from azure.identity import DefaultAzureCredential
 
-import os
 from azure.ai.ml import MLClient
-from azure.identity import DefaultAzureCredential
-import argparse
-import sys
-from pathlib import Path
-import os 
-# lsflsdjjfjlk
-# sfjsldfjlsdjlk sf
-# sdfsjfl
 
 
-from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential, ClientSecretCredential
-from azure.ai.ml import MLClient
-from azure.ai.ml.entities import Environment
-from azure.core.exceptions import ResourceNotFoundError # Import for catching specific exception (though less critical for create_or_update)
-# fjsldf
 
-import os
+
+
 from src.config.connect import get_ml_client
-from azure.ai.ml.entities import Model
-from azure.ai.ml.constants import AssetTypes
-
-# --- Retrieve environment variables *inside* run_pipeline.py ---
-# These variables are set by the 'env' block in your GitHub Actions workflow.
-subscription_id = os.environ.get("SUBSCRIPTION_ID")
-resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
-workspace_name = os.environ.get("WORKSPACE_NAME")
-
-# --- Add robust checks to ensure variables are present and not empty ---
-missing_vars = []
-if not subscription_id: # Checks for None or empty string
-    missing_vars.append("SUBSCRIPTION_ID")
-if not resource_group_name: # Checks for None or empty string
-    missing_vars.append("RESOURCE_GROUP_NAME")
-if not workspace_name: # Checks for None or empty string
-    missing_vars.append("WORKSPACE_NAME")
-
-if missing_vars:
-    raise ValueError(
-        f"Missing or empty required Azure ML environment variables: "
-        f"{', '.join(missing_vars)}. "
-        f"Please ensure they are set in your GitHub workflow secrets "
-        f"and correctly passed to the 'Run Pipeline' step."
-    )
-
-# --- Initialize MLClient by passing the retrieved values ---
-ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
-print("🎯 MLClient created successfully.")
-
-# --- Your existing model registration code ---
-model = Model(
-    path="./GBM_model_python_1749296476765_1.zip",
-    type=AssetTypes.CUSTOM_MODEL,
-    name="h2o-model",
-    description="My custom model registered from local file"
-)
-registered_model = ml_client.models.create_or_update(model)
-print(f"Model registered: {registered_model.name}, Version: {registered_model.version}")
 
 def register_components(ml_client: MLClient, version: str):
     """Loads components from YAML and registers them with a unique version."""
@@ -128,7 +67,7 @@ def model_cicd_pipeline(
     return {"deployment_status": deploy_step.outputs.deployment_status}
 
 if __name__ == "__main__":
-    ml_client = get_ml_client(subscription_id, resource_group_name, workspace_name)
+    ml_client = get_ml_client()
     
     # Unique version for this run, e.g., based on timestamp or git commit hash
     version = datetime.now().strftime("%Y.%m.%d.%H%M%S")
@@ -138,7 +77,7 @@ if __name__ == "__main__":
     pipeline_job = model_cicd_pipeline(
         model_path=Input(type='uri_file', path='./model/GBM_model_python_1749296476765_1.zip'), 
         model_name="my-h2o-cicd-model",
-        endpoint_name="uddin", # Make sure this endpoint exists or will be created
+        endpoint_name="shafi", # Make sure this endpoint exists or will be created
         environment_base_name="iat-endpiont-v3",
         conda_file=Input(type='uri_file', path='./component/create_environment/conda.yaml')
     )
