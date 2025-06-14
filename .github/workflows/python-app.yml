@@ -68,14 +68,14 @@ jobs:
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
         run: |
-          echo "--- Environment variables passed to run_pipeline.py (Dev) ---"
+          echo "--- Environment variables passed to run_pipeline.py (Dev - Shell Context) ---"
           echo "TENANT_ID: $TENANT_ID"
           echo "CLIENT_ID: $CLIENT_ID"
           echo "CLIENT_SECRET: $(echo $CLIENT_SECRET | sed 's/./*/g')" # Mask sensitive secret for logs
           echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
           echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
           echo "WORKSPACE_NAME: $WORKSPACE_NAME"
-          echo "------------------------------------------------------------"
+          echo "--------------------------------------------------------------------------"
           python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
 
   deploy-to-prod:
@@ -135,12 +135,12 @@ jobs:
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
         run: |
-          echo "--- Environment variables passed to run_pipeline.py (Prod) ---"
+          echo "--- Environment variables passed to run_pipeline.py (Prod - Shell Context) ---"
           echo "TENANT_ID: $TENANT_ID"
           echo "CLIENT_ID: $CLIENT_ID"
           echo "CLIENT_SECRET: $(echo $CLIENT_SECRET | sed 's/./*/g')" # Mask sensitive secret for logs
           echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
           echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
           echo "WORKSPACE_NAME: $WORKSPACE_NAME"
-          echo "------------------------------------------------------------"
+          echo "--------------------------------------------------------------------------"
           python run_pipeline.py
