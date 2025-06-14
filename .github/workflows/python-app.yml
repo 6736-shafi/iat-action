@@ -122,7 +122,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install azure-ai-ml azure-identity python-dotenv
       - name: Log in to Azure
-        # Uses the Azure Login action with a service principal secret for authentication.
+        # Uses the Azure Login action with a service principal secret for authentication.s
         # Ensure 'AZURE_CREDENTIALS' secret is configured in the 'production' environment.
         # The secret should contain the JSON output from 'az ad sp create-for-rbac --json-auth'.
         uses: azure/login@v1
