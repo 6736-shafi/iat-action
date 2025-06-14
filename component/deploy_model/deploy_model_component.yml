@@ -35,3 +35,12 @@ command: >-
   --deployment_status ${{outputs.deployment_status}}
 
 environment: azureml:h2o-env:3
+
+
+environment_variables:
+  TENANT_ID: ${{env.TENANT_ID}}
+  CLIENT_ID: ${{env.CLIENT_ID}}
+  CLIENT_SECRET: ${{env.CLIENT_SECRET}}
+  SUBSCRIPTION_ID: ${{env.SUBSCRIPTION_ID}}
+  RESOURCE_GROUP_NAME: ${{env.RESOURCE_GROUP_NAME}}
+  WORKSPACE_NAME: ${{env.WORKSPACE_NAME}}
