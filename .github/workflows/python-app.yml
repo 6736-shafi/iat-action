@@ -59,10 +59,16 @@ jobs:
       - name: Debug - Print Azure Environment Variables
         # This step helps confirm the values of environment variables passed to the Python script.
         run: |
+          echo "TENANT_ID: $TENANT_ID"
+          echo "CLIENT_ID: $CLIENT_ID"
+          echo "CLIENT_SECRET: $CLIENT_SECRET"
           echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
           echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
           echo "WORKSPACE_NAME: $WORKSPACE_NAME"
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }} # Added
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} # Added
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }} # Added
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
@@ -70,13 +76,15 @@ jobs:
       - name: Run Pipeline in Dev
         # Pass Azure ML workspace details as environment variables to the Python script
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }} # Added
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} # Added
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }} # Added
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }} # Ensure this secret is set for 'development'
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }} # Ensure this secret is set for 'development'
         run: python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
 
   deploy-to-prod:
-
     # Trigger conditions for production deployment:
     # Only push directly to the 'main' branch
     if: github.ref == 'refs/heads/main'
@@ -124,10 +132,16 @@ jobs:
       - name: Debug - Print Azure Environment Variables
         # This step helps confirm the values of environment variables passed to the Python script.
         run: |
+          echo "TENANT_ID: $TENANT_ID"
+          echo "CLIENT_ID: $CLIENT_ID"
+          echo "CLIENT_SECRET: $CLIENT_SECRET"
           echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
           echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
           echo "WORKSPACE_NAME: $WORKSPACE_NAME"
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }} # Added
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} # Added
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }} # Added
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
@@ -135,6 +149,9 @@ jobs:
       - name: Run Pipeline in Prod
         # Pass Azure ML workspace details as environment variables to the Python script
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }} # Added
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} # Added
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }} # Added
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
