@@ -1,159 +1,63 @@
 import os
-from datetime import datetime
-from azure.ai.ml import MLClient, load_component, Input
-from azure.ai.ml.dsl import pipeline
-from azure.ai.ml.entities import CommandJob # For type hinting if needed, not directly instantiated here
-from azure.ai.ml.constants import AssetTypes
+# from dotenv import load_dotenv # <<< CRITICAL: Keep this line commented out or remove it!
 
-# Import your custom connect module
-from src.config.connect import get_ml_client # Adjusted path if necessary
+from azure.identity import ClientSecretCredential
+from azure.ai.ml import MLClient
 
-# --- MLClient creation for pipeline submission (runs on GitHub Actions runner) ---
-# This block is essential for your run_pipeline.py to authenticate and submit to AML.
-# The secrets are available in the GitHub Actions runner environment, so get_ml_client() here
-# should successfully retrieve them.
-ml_client = None # Initialize to None
-try:
-    ml_client = get_ml_client()
-    print("MLClient created successfully in run_pipeline.py (GitHub Actions runner context).")
-except ValueError as e:
-    print(f"Error creating MLClient in run_pipeline.py on GitHub Actions runner: {e}")
-    # Exit the GitHub Actions job if the client can't be created
-    exit(1)
+def get_ml_client() -> MLClient:
+    """
+    Authenticates to Azure Machine Learning workspace using a Service Principal
+    and returns an MLClient object.
 
+    Expects the following environment variables to be set:
+    - TENANT_ID: Your Azure Active Directory tenant ID.
+    - CLIENT_ID: The client ID (Application ID) of your Service Principal.
+    - CLIENT_SECRET: The client secret of your Service Principal.
+    - SUBSCRIPTION_ID: Your Azure subscription ID.
+    - RESOURCE_GROUP_NAME: The name of the resource group where your AML workspace resides.
+    - WORKSPACE_NAME: The name of your Azure Machine Learning workspace.
 
-# --- IMPORTANT: Retrieve environment variables from the GitHub Actions runner ---
-# These are the variables that GitHub Actions is setting for run_pipeline.py.
-# These will then be passed down to the Azure ML component runtimes.
-env_vars_for_components = {
-    "TENANT_ID": os.getenv("TENANT_ID"),
-    "CLIENT_ID": os.getenv("CLIENT_ID"),
-    "CLIENT_SECRET": os.getenv("CLIENT_SECRET"),
-    "SUBSCRIPTION_ID": os.getenv("SUBSCRIPTION_ID"),
-    "RESOURCE_GROUP_NAME": os.getenv("RESOURCE_GROUP_NAME"),
-    "WORKSPACE_NAME": os.getenv("WORKSPACE_NAME")
-}
+    Returns:
+        MLClient: An authenticated MLClient object to interact with your workspace.
+    """
+    print("--- Inside get_ml_client() (Azure ML Component Context / Python Process) ---")
+    # In Azure ML components, environment variables are passed directly to the container runtime.
+    # load_dotenv() is not needed and can interfere.
 
-# --- Debugging environment variables in run_pipeline.py itself ---
-# This verifies what os.getenv() sees in the GitHub Actions Python process
-print("\n--- Verifying raw OS environment in run_pipeline.py (GitHub Actions Python Process) ---")
-print(f"os.getenv('TENANT_ID'): {os.getenv('TENANT_ID')}")
-print(f"os.getenv('CLIENT_ID'): {os.getenv('CLIENT_ID')}")
-print(f"os.getenv('CLIENT_SECRET'): {'*' * len(os.getenv('CLIENT_SECRET')) if os.getenv('CLIENT_SECRET') else 'None'}")
-print(f"os.getenv('SUBSCRIPTION_ID'): {os.getenv('SUBSCRIPTION_ID')}")
-print(f"os.getenv('RESOURCE_GROUP_NAME'): {os.getenv('RESOURCE_GROUP_NAME')}")
-print(f"os.getenv('WORKSPACE_NAME'): {os.getenv('WORKSPACE_NAME')}")
-print("------------------------------------------------------------------------------------\n")
+    tenant_id = os.getenv("TENANT_ID")
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
+    subscription_id = os.getenv("SUBSCRIPTION_ID")
+    resource_group_name = os.getenv("RESOURCE_GROUP_NAME")
+    workspace_name = os.getenv("WORKSPACE_NAME")
 
-# Assert that all variables are retrieved for passing to components
-if not all(env_vars_for_components.values()):
-    print("WARNING: One or more environment variables are None when collected in run_pipeline.py. Check GitHub Secrets.")
-    # You might want to exit here if critical variables are missing
-    # exit(1)
-
-
-def register_components(client: MLClient, version_str: str):
-    """Loads components from YAML and registers them with a unique version."""
-    component_yamls = [
-        "./component/create_environment/create_environment_component.yml",
-        "./component/register_model/register_model_component.yml",
-        "./component/deploy_model/deploy_model_component.yml",
-    ]
-
-    for comp_yaml in component_yamls:
-        component = load_component(source=comp_yaml)
-        component.version = version_str # Use the passed version string
-        client.components.create_or_update(component)
-        print(f"Registered component '{component.name}' with version '{version_str}'")
-
-
-@pipeline(
-    default_compute="cpu-cluster", # Make sure this compute cluster exists in your workspace
-    description="CI/CD pipeline to create env, register model, and deploy."
-)
-def model_cicd_pipeline(
-    model_path: Input,
-    model_name: str,
-    endpoint_name: str,
-    environment_base_name: str,
-    conda_file: Input,
-):
-    """The definition of the CI/CD pipeline."""
-    # These are loaded from the global scope using the ml_client created above
-    # Make sure 'version' is accessible here (e.g., passed as an argument or from global scope)
-    global ml_client, version # Access global ml_client and version
-    
-    create_env_comp = ml_client.components.get(name="create_environment", version=version)
-    register_model_comp = ml_client.components.get(name="register_model", version=version)
-    deploy_model_comp = ml_client.components.get(name="deploy_model", version=version)
-
-    # Step 1: Create the environment
-    create_env_step = create_env_comp(
-        environment_name=environment_base_name,
-        conda_file=conda_file
-    )
-    # THIS IS THE CRUCIAL PART FOR PASSING ENV VARS TO THE COMPONENT'S RUNTIME
-    create_env_step.environment_variables = env_vars_for_components
-    print(f"\n--- Debugging create_env_step.environment_variables (in run_pipeline.py) ---")
-    print(f"Type: {type(create_env_step.environment_variables)}")
-    print(f"Value: {create_env_step.environment_variables}")
-    print("----------------------------------------------------------------------------")
-
-
-    # Step 2: Register the model
-    register_step = register_model_comp(
-        model_path=model_path,
-        model_name=model_name
-    )
-    # THIS IS THE CRUCIAL PART FOR PASSING ENV VARS TO THE COMPONENT'S RUNTIME
-    register_step.environment_variables = env_vars_for_components
-    print(f"\n--- Debugging register_step.environment_variables (in run_pipeline.py) ---")
-    print(f"Type: {type(register_step.environment_variables)}")
-    print(f"Value: {register_step.environment_variables}")
+    # Debugging: Print what os.getenv() sees inside this Python process
+    print(f"Python sees TENANT_ID: {tenant_id}")
+    print(f"Python sees CLIENT_ID: {client_id}")
+    print(f"Python sees CLIENT_SECRET: {'*' * len(client_secret) if client_secret else 'None'}") # Mask secret
+    print(f"Python sees SUBSCRIPTION_ID: {subscription_id}")
+    print(f"Python sees RESOURCE_GROUP_NAME: {resource_group_name}")
+    print(f"Python sees WORKSPACE_NAME: {workspace_name}")
     print("--------------------------------------------------------------------------")
 
+    # Basic validation that environment variables are set
+    if not all([tenant_id, client_id, client_secret, subscription_id, resource_group_name, workspace_name]):
+        raise ValueError(
+            "One or more required environment variables (TENANT_ID, CLIENT_ID, CLIENT_SECRET, "
+            "SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, WORKSPACE_NAME) are not set inside the Azure ML component."
+        )
 
-    # Step 3: Deploy the model
-    deploy_step = deploy_model_comp(
-        endpoint_name=endpoint_name,
-        environment_name=create_env_step.outputs.created_env_name,
-        environment_version=create_env_step.outputs.created_env_version,
-        model_name=register_step.outputs.registered_model_name,
-        model_version=register_step.outputs.registered_model_version
+    # Authenticate using ClientSecretCredential
+    credential = ClientSecretCredential(
+        tenant_id=tenant_id,
+        client_id=client_id,
+        client_secret=client_secret
     )
-    # THIS IS THE CRUCIAL PART FOR PASSING ENV VARS TO THE COMPONENT'S RUNTIME
-    deploy_step.environment_variables = env_vars_for_components
-    print(f"\n--- Debugging deploy_step.environment_variables (in run_pipeline.py) ---")
-    print(f"Type: {type(deploy_step.environment_variables)}")
-    print(f"Value: {deploy_step.environment_variables}")
-    print("-------------------------------------------------------------------------")
 
-    return {"deployment_status": deploy_step.outputs.deployment_status}
-
-if __name__ == "__main__":
-    # The ml_client is already initialized globally at the top of the script
-    
-    # Unique version for this run, e.g., based on timestamp or git commit hash
-    version = datetime.now().strftime("%Y.%m.%d.%H%M%S")
-    
-    register_components(ml_client, version)
-    
-    pipeline_job = model_cicd_pipeline(
-        model_path=Input(type=AssetTypes.URI_FILE, path='./model/GBM_model_python_1749296476765_1.zip'),
-        model_name="my-h2o-cicd-model",
-        endpoint_name="shafi", # Make sure this endpoint exists or will be created
-        environment_base_name="iat-endpoint-v3", # Corrected typo "endpiont" to "endpoint"
-        conda_file=Input(type=AssetTypes.URI_FILE, path='./component/create_environment/conda.yaml')
+    ml_client = MLClient(
+        credential=credential,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group_name,
+        workspace_name=workspace_name,
     )
-    
-    pipeline_job.display_name = f"cicd-pipeline-{version}"
-    
-    submitted_job = ml_client.jobs.create_or_update(
-        pipeline_job,
-        experiment_name="cicd_pipeline_runs"
-    )
-    
-    print("="*60)
-    print(f"Pipeline job submitted. Name: {submitted_job.name}")
-    print(f"View in Azure ML Studio: {submitted_job.studio_url}")
-    print("="*60)
+    return ml_client
