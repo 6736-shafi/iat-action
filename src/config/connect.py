@@ -28,13 +28,13 @@ def get_ml_client() -> MLClient:
         MLClient: An authenticated MLClient object to interact with your workspace.
     """
     # Service principal details (retrieved from environment variables)
-    tenant_id = os.getenv("TENANT_ID")
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
+    tenant_id = os.getenv("AZURE_TENANT_ID")
+    client_id = os.getenv("AZURE_CLIENT_ID")
+    client_secret = os.getenv("AZURE_CLIENT_SECRET")
 
-    subscription_id = os.getenv("SUBSCRIPTION_ID")
-    resource_group_name = os.getenv("RESOURCE_GROUP_NAME")
-    workspace_name = os.getenv("WORKSPACE_NAME")
+    subscription_id = os.getenv("AZURE_SUBSCRIPTION_ID")
+    resource_group_name = os.getenv("AZURE_RESOURCE_GROUP")
+    workspace_name = os.getenv("AZURE_WORKSPACE")
 
     # Basic validation that environment variables are set
     if not all([tenant_id, client_id, client_secret, subscription_id, resource_group_name, workspace_name]):
