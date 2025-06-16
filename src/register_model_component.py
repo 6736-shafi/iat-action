@@ -87,3 +87,13 @@ if __name__ == "__main__":
         args.registered_model_name,
         args.registered_model_version
     )
+
+
+from src.utils.get_model_path import get_latest_model_from_folder
+
+latest_model = get_latest_model_from_folder('./model')
+print(f"Latest model found: {latest_model}")
+latest_model='../model/GBM_model_python_1749740346516_6.zip'
+print(f"Full path to latest model: {latest_model}")
+
+
