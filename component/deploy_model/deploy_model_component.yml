@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.jso
 name: deploy_model
 display_name: Deploy Model
 description: Deploys the registered model to an existing online endpoint.
-version: 4201 # Increment version after change
+version: 42011 # Increment version after change
 type: command
 
 inputs:
@@ -33,9 +33,9 @@ command: >-
   --model_name ${{inputs.model_name}} 
   --model_version ${{inputs.model_version}} 
   --deployment_status ${{outputs.deployment_status}}
-
-environment:
-  conda_file: ../create_environment/conda.yaml # This conda.yaml is for the component's own execution
-  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
+environment: azureml:h2o-env:3
+# environment:
+#   conda_file: ../create_environment/conda.yaml # This conda.yaml is for the component's own execution
+#   image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
 
 
