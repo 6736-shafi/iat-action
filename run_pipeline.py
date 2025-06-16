@@ -10,7 +10,7 @@ from src.config.connect import get_ml_client # Adjusted path if necessary
 
 # --- MLClient creation for pipeline submission (runs on GitHub Actions runner) ---
 # This block is essential for your run_pipeline.py to authenticate and submit to AML.
-# The secrets are available in the GitHub Actions runner environment, so get_ml_client() here
+# The secrets are available in the GitHub Actions runner environment, so get_ml_client() here s
 # should successfully retrieve them.
 ml_client = None # Initialize to None
 try:
