@@ -23,4 +23,3 @@ def get_latest_model_from_folder(folder_path: str) -> Optional[str]:
     return latest_model
 
     
-# print(get_latest_model_from_folder('../../model') ) # Example usage, adjust path as needed
