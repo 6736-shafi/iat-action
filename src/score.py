@@ -13,7 +13,7 @@ def init():
 
     # Use current directory if AZUREML_MODEL_DIR is not set
     model_dir = os.getenv("AZUREML_MODEL_DIR") or "."
-    model_path = os.path.join(model_dir, "my_h2o_model_20250616_134008.zip")
+    model_path = os.path.join(model_dir, "GBM_model_python_1749296476765_1.zip")
 
     print("Loading MOJO model from:", model_path)
 
