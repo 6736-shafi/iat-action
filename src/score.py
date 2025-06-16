@@ -4,6 +4,11 @@ import pandas as pd
 import h2o
 import json
 
+from utils.get_model_path import get_latest_mojo_model
+latest_model = get_latest_mojo_model('../model')
+
+model_name = os.path.basename(latest_model)
+
 def init():
     import logging
     global model
@@ -13,7 +18,7 @@ def init():
 
     # Use current directory if AZUREML_MODEL_DIR is not set
     model_dir = os.getenv("AZUREML_MODEL_DIR") or "."
-    model_path = os.path.join(model_dir, "GBM_model_python_1749296476765_1.zip")
+    model_path = os.path.join(model_dir, model_name)
 
     print("Loading MOJO model from:", model_path)
 
@@ -55,3 +60,4 @@ def run(data):
     except Exception as e:
         logging.exception("Prediction failed")
         return json.dumps({"error": str(e)})
+
