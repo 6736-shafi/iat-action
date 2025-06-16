@@ -151,7 +151,7 @@ if __name__ == "__main__":
     pipeline_job = model_cicd_pipeline(
         model_path=Input(type='uri_file', path=latest_model),
         model_name="my-h2o-cicd-model",
-        endpoint_name="shafi", # Make sure this endpoint exists or will be created!
+        endpoint_name="shafi1", # Make sure this endpoint exists or will be created!
         environment_base_name="iat-endpoint-v3", # Corrected typo "endpiont" to "endpoint"
         conda_file=Input(type=AssetTypes.URI_FILE, path='./component/create_environment/conda.yaml')
     )
