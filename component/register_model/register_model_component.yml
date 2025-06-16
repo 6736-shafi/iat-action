@@ -25,7 +25,9 @@ code: ../../src
 command: >-
   python register_model_component.py --model_path ${{inputs.model_path}} --model_name ${{inputs.model_name}} --registered_model_name ${{outputs.registered_model_name}} --registered_model_version ${{outputs.registered_model_version}}
 
-environment: azureml:h2o-env:3
+environment:
+  conda_file: ../create_environment/conda.yaml # This conda.yaml is for the component's own execution
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
 
 
 
