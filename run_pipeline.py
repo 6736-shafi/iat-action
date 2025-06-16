@@ -53,7 +53,7 @@ if not all(env_vars_for_components.values()):
 
 
 
-from src.utils.get_model_path import get_latest_mojo_model
+from src.utils.get_model_path import get_latest_model_from_folder
 
 from src.config.connect import get_ml_client
 
@@ -138,8 +138,9 @@ def model_cicd_pipeline(
 
 if __name__ == "__main__":
     ml_client = get_ml_client()
-    latest_model = get_latest_mojo_model('./model')
+    latest_model = get_latest_model_from_folder('./model')
     print(f"Latest model found: {latest_model}")
+    latest_model='./model/'+latest_model
     
     
     
@@ -171,6 +172,10 @@ if __name__ == "__main__":
     print("="*60) 
    
 
-# fdf
 
+# from src.utils.get_model_path import get_latest_model_from_folder
 
+# latest_model = get_latest_model_from_folder('./model')
+# print(f"Latest model found: {latest_model}")
+# latest_model='./model/'+latest_model
+# print(f"Full path to latest model: {latest_model}")
