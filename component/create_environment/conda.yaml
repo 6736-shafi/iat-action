@@ -13,6 +13,7 @@ dependencies:
     - azureml-core
     - azureml-inference-server-http
     - scikit-learn 
+    - scikit-learn 
     - h2o==3.40.0.1
     - azure-ai-ml==1.27.1
     - azure-core==1.34.0
