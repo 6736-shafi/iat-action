@@ -26,3 +26,6 @@ command: >-
   python register_model_component.py --model_path ${{inputs.model_path}} --model_name ${{inputs.model_name}} --registered_model_name ${{outputs.registered_model_name}} --registered_model_version ${{outputs.registered_model_version}}
 
 environment: azureml:h2o-env:3
+
+
+

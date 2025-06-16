@@ -38,6 +38,7 @@ jobs:
           else
             echo "'components' directory NOT found!"
           fi
+
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
@@ -48,6 +49,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install azure-ai-ml azure-identity python-dotenv
+
       - name: Log in to Azure
         # Uses the Azure Login action with a service principal secret for authentication.
         # Ensure 'AZURE_CREDENTIALS' secret is configured in the 'development' environment.
@@ -56,30 +58,30 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Debug - Print Azure Environment Variables
-        # This step helps confirm the values of environment variables passed to the Python script.
-        run: |
-          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
-          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
-          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
-        env:
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
-
       - name: Run Pipeline in Dev
         # Pass Azure ML workspace details as environment variables to the Python script
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }} # Ensure this secret is set for 'development'
-          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }} # Ensure this secret is set for 'development'
-        run: python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
+          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
+        run: |
+          echo "--- Environment variables passed to run_pipeline.py (Dev - Shell Context) ---"
+          echo "TENANT_ID: $TENANT_ID"
+          echo "CLIENT_ID: $CLIENT_ID"
+          echo "CLIENT_SECRET: $(echo $CLIENT_SECRET | sed 's/./*/g')" # Mask sensitive secret for logs
+          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
+          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
+          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
+          echo "--------------------------------------------------------------------------"
+          python run_pipeline.py # Assumes run_pipeline.py is at the root of your repo
 
   deploy-to-prod:
-
     # Trigger conditions for production deployment:
-    # Only push directly to the 'main' branch
-    if: github.ref == 'refs/heads/main'
+    # Only push directly to the 'main' branch or merge PR into main
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     environment: production # Associate with the 'production' GitHub environment (can require manual approval)
     permissions:
@@ -103,6 +105,7 @@ jobs:
           else
             echo "'components' directory NOT found!"
           fi
+
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
@@ -113,6 +116,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install azure-ai-ml azure-identity python-dotenv
+
       - name: Log in to Azure
         # Uses the Azure Login action with a service principal secret for authentication.
         # Ensure 'AZURE_CREDENTIALS' secret is configured in the 'production' environment.
@@ -121,21 +125,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Debug - Print Azure Environment Variables
-        # This step helps confirm the values of environment variables passed to the Python script.
-        run: |
-          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
-          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
-          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
-        env:
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
-
       - name: Run Pipeline in Prod
         # Pass Azure ML workspace details as environment variables to the Python script
         env:
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP }}
           WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE }}
-        run: python run_pipeline.py
+        run: |
+          echo "--- Environment variables passed to run_pipeline.py (Prod - Shell Context) ---"
+          echo "TENANT_ID: $TENANT_ID"
+          echo "CLIENT_ID: $CLIENT_ID"
+          echo "CLIENT_SECRET: $(echo $CLIENT_SECRET | sed 's/./*/g')" # Mask sensitive secret for logs
+          echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
+          echo "RESOURCE_GROUP_NAME: $RESOURCE_GROUP_NAME"
+          echo "WORKSPACE_NAME: $WORKSPACE_NAME"
+          echo "--------------------------------------------------------------------------"
+          python run_pipeline.py
