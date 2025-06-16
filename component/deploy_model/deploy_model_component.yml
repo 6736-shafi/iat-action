@@ -34,6 +34,8 @@ command: >-
   --model_version ${{inputs.model_version}} 
   --deployment_status ${{outputs.deployment_status}}
 
-environment: azureml:h2o-env:3
+environment:
+  conda_file: ../create_environment/conda.yaml # This conda.yaml is for the component's own execution
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
 
 
