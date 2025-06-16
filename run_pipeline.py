@@ -140,6 +140,7 @@ if __name__ == "__main__":
     ml_client = get_ml_client()
     latest_model = get_latest_model_from_folder('./model')
     print(f"Latest model found: {latest_model}")
+    latest_model='./model/'+latest_model
     
     
     
