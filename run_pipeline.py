@@ -8,7 +8,7 @@ from azure.ai.ml import MLClient
 
 
 
-
+from src.utils.get_model_path import get_latest_mojo_model
 
 from src.config.connect import get_ml_client
 
@@ -68,6 +68,10 @@ def model_cicd_pipeline(
 
 if __name__ == "__main__":
     ml_client = get_ml_client()
+    latest_model = get_latest_mojo_model('./model')
+    print(f"Latest model found: {latest_model}")
+    
+    
     
     # Unique version for this run, e.g., based on timestamp or git commit hash
     version = datetime.now().strftime("%Y.%m.%d.%H%M%S")
@@ -75,7 +79,7 @@ if __name__ == "__main__":
     register_components(ml_client, version)
     
     pipeline_job = model_cicd_pipeline(
-        model_path=Input(type='uri_file', path='./model/GBM_model_python_1749296476765_1.zip'), 
+        model_path=Input(type='uri_file', path=latest_model),
         model_name="my-h2o-cicd-model",
         endpoint_name="shafi", # Make sure this endpoint exists or will be created
         environment_base_name="iat-endpiont-v3",
@@ -95,3 +99,7 @@ if __name__ == "__main__":
     print(f"View in Azure ML Studio: {submitted_job.studio_url}")
     print("="*60) 
    
+
+
+
+
