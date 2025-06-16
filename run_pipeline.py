@@ -8,9 +8,9 @@ from azure.ai.ml.constants import AssetTypes
 # Import your custom connect module
 from src.config.connect import get_ml_client # Adjusted path if necessary
 
-# --- MLClient creation for pipeline submission (runs on GitHub Actions runner) ---
+# --- MLClient creation for pipeline submission (runs on GitHub Actions runner) ---s
 # This block is essential for your run_pipeline.py to authenticate and submit to AML.
-# The secrets are available in the GitHub Actions runner environment, so get_ml_client() here
+# The secrets are available in the GitHub Actions runner environment, so get_ml_client() here s
 # should successfully retrieve them.
 ml_client = None # Initialize to None
 try:
@@ -50,6 +50,12 @@ if not all(env_vars_for_components.values()):
     print("WARNING: One or more environment variables are None when collected in run_pipeline.py. Check GitHub Secrets.")
     # You might want to exit here if critical variables are missing
     # exit(1)
+
+
+
+from src.utils.get_model_path import get_latest_mojo_model
+
+from src.config.connect import get_ml_client
 
 
 def register_components(client: MLClient, version_str: str):
@@ -131,7 +137,11 @@ def model_cicd_pipeline(
     return {"deployment_status": deploy_step.outputs.deployment_status}
 
 if __name__ == "__main__":
-    # The ml_client is already initialized globally at the top of the script
+    ml_client = get_ml_client()
+    latest_model = get_latest_mojo_model('./model')
+    print(f"Latest model found: {latest_model}")
+    
+    
     
     # Unique version for this run, e.g., based on timestamp or git commit hash
     version = datetime.now().strftime("%Y.%m.%d.%H%M%S")
@@ -139,9 +149,9 @@ if __name__ == "__main__":
     register_components(ml_client, version)
     
     pipeline_job = model_cicd_pipeline(
-        model_path=Input(type=AssetTypes.URI_FILE, path='./model/GBM_model_python_1749296476765_1.zip'),
+        model_path=Input(type='uri_file', path=latest_model),
         model_name="my-h2o-cicd-model",
-        endpoint_name="uddin", # Make sure this endpoint exists or will be created
+        endpoint_name="shafi", # Make sure this endpoint exists or will be created
         environment_base_name="iat-endpoint-v3", # Corrected typo "endpiont" to "endpoint"
         conda_file=Input(type=AssetTypes.URI_FILE, path='./component/create_environment/conda.yaml')
     )
@@ -156,4 +166,9 @@ if __name__ == "__main__":
     print("="*60)
     print(f"Pipeline job submitted. Name: {submitted_job.name}")
     print(f"View in Azure ML Studio: {submitted_job.studio_url}")
-    print("="*60)
+    print("="*60) 
+   
+
+
+
+
