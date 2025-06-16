@@ -53,7 +53,7 @@ if not all(env_vars_for_components.values()):
 
 
 
-from src.utils.get_model_path import get_latest_mojo_model
+from src.utils.get_model_path import get_latest_model_from_folder, get_latest_mojo_model
 
 from src.config.connect import get_ml_client
 
