@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 
-def get_latest_mojo_model(folder_path: str) -> str | None:
+def get_latest_mojo_model(folder_path: str):
     """
     Finds the H2O MOJO model file with the latest timestamp in a given folder.
 
